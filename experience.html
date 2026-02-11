@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Experience | Smart Window & Heater Advisor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Space Grotesk", "Sora", "Segoe UI", sans-serif; }
+    :root { --bg: #0b0f14; --text: #e6edf3; }
+    body { background: var(--bg); color: var(--text); line-height: 1.6; }
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: #0b0f14;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(4px);
+    }
+    .navbar.scrolled { border-bottom: 1px solid rgba(255,255,255,0.15); }
+    .nav-row { height: 72px; display: flex; align-items: center; padding: 0 6%; }
+    .logo { display: flex; align-items: center; margin-right: 48px; flex-shrink: 0; }
+    .logo img { height: 100px; width: auto; }
+    .nav-links { display: flex; justify-content: center; gap: 32px; flex: 1; }
+    .nav-links a { color: #e6edf3; text-decoration: none; font-size: 0.95rem; opacity: 0.75; }
+    .nav-links a:hover { opacity: 1; }
+    .nav-actions { display: flex; gap: 20px; flex-shrink: 0; }
+    .login { color: #e6edf3; text-decoration: none; opacity: 0.8; }
+    .cta { background: #e6edf3; color: #0b0f14; padding: 8px 16px; border-radius: 999px; font-size: 0.9rem; font-weight: 500; text-decoration: none; }
+
+    .hero {
+      padding: 140px 8% 110px;
+      position: relative;
+      overflow: hidden;
+      background: url("assets/tech-bg.jpg") center/cover no-repeat;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(6,10,16,0.55), rgba(6,10,16,0.85));
+      pointer-events: none;
+    }
+    .hero-content { position: relative; z-index: 1; max-width: 980px; }
+    .hero > * { position: relative; z-index: 1; }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(135deg,
+          rgba(140, 220, 255, 0.08) 0,
+          rgba(140, 220, 255, 0.08) 1px,
+          rgba(140, 220, 255, 0.0) 1px,
+          rgba(140, 220, 255, 0.0) 18px);
+      opacity: 0.25;
+      pointer-events: none;
+    }
+    .hero-content { position: relative; z-index: 1; max-width: 980px; }
+    .hero > * { position: relative; z-index: 1; }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 980px;
+    }
+
+    .hero h1 {
+      font-size: 3.1rem;
+      margin-bottom: 14px;
+      background: linear-gradient(110deg, #f2fbff 0%, #9ad6ff 45%, #6fe6c7 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 16px rgba(154,214,255,0.28);
+      position: relative;
+      display: inline-block;
+    }
+
+    .hero h1::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -8px;
+      width: 70%;
+      height: 3px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(143,209,255,0.15), rgba(127,212,255,0.9), rgba(111,230,199,0.5));
+      box-shadow: 0 0 14px rgba(127,212,255,0.4);
+    }
+
+    .hero h2 {
+      font-size: 1.5rem;
+      font-weight: 500;
+      margin-bottom: 16px;
+      color: #dfe9f4;
+    }
+
+    .hero p {
+      color: #b8c2cc;
+      font-size: 1.05rem;
+      line-height: 1.7;
+      max-width: 820px;
+    }
+
+    .hero-highlights {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 28px;
+    }
+
+    .hero-chip {
+      border: 1px solid rgba(127,212,255,0.2);
+      border-radius: 12px;
+      padding: 12px 14px;
+      background: rgba(10,18,30,0.55);
+      color: #d6e4f2;
+      box-shadow: 0 16px 32px rgba(0,0,0,0.35);
+      font-size: 0.95rem;
+    }
+
+    .hero-chip strong {
+      display: block;
+      color: #eaf4ff;
+      margin-bottom: 4px;
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .section {
+      padding: 90px 8%;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      position: relative;
+    }
+
+    .section-title {
+      font-size: 2rem;
+      margin-bottom: 18px;
+      background: linear-gradient(110deg, #f2fbff 0%, #9ad6ff 45%, #6fe6c7 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 16px rgba(154,214,255,0.25);
+    }
+
+    .section-subtitle {
+      color: #b8c2cc;
+      max-width: 820px;
+      font-size: 1.02rem;
+      margin-bottom: 24px;
+    }
+
+    .video-shell {
+      position: relative;
+      border-radius: 18px;
+      border: 1px solid rgba(127,212,255,0.2);
+      background:
+        radial-gradient(400px 220px at 20% 20%, rgba(127,212,255,0.2), transparent 60%),
+        linear-gradient(140deg, rgba(12,20,32,0.92), rgba(10,16,26,0.75));
+      box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+      overflow: hidden;
+      padding: 18px;
+    }
+
+    .video-frame {
+      width: 100%;
+      height: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 14px;
+      border: 1px solid rgba(127,212,255,0.18);
+      background:
+        radial-gradient(320px 180px at 15% 30%, rgba(127,212,255,0.18), transparent 65%),
+        linear-gradient(140deg, rgba(10,16,26,0.9), rgba(8,12,20,0.8));
+      display: grid;
+      place-items: center;
+      color: rgba(154,214,255,0.6);
+      letter-spacing: 0.18em;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      transform: none;
+      transform-origin: center;
+      object-fit: contain;
+    }
+
+    .quote-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .quote-card {
+      border-radius: 16px;
+      border: 1px solid rgba(127,212,255,0.18);
+      background: rgba(12,20,32,0.78);
+      padding: 18px;
+      box-shadow: 0 22px 42px rgba(0,0,0,0.35);
+      position: relative;
+    }
+
+    .quote-card::before {
+      content: 1;
+      position: absolute;
+      top: 10px;
+      left: 14px;
+      font-size: 2.2rem;
+      color: rgba(127,212,255,0.5);
+      font-family: "Orbitron", "Space Grotesk", "Sora", "Segoe UI", sans-serif;
+    }
+
+    .quote-text {
+      color: #d7e3f1;
+      margin: 14px 0 16px;
+      font-size: 0.98rem;
+      line-height: 1.6;
+    }
+
+    .quote-meta {
+      display: grid;
+      gap: 4px;
+      color: #9fb2c7;
+      font-size: 0.9rem;
+    }
+
+    .quote-meta strong {
+      color: #e6f1ff;
+      font-weight: 600;
+    }
+
+    footer { padding: 40px 8%; text-align: center; color: #7f8a96; font-size: 0.9rem; }
+
+    .review-wall {
+      margin-top: 28px;
+      padding: 26px;
+      border-radius: 18px;
+      background: linear-gradient(140deg, rgba(10,16,26,0.9), rgba(8,12,20,0.8));
+      border: 1px solid rgba(127,212,255,0.16);
+      box-shadow: 0 24px 48px rgba(0,0,0,0.35);
+      overflow: hidden;
+    }
+
+    .review-streams {
+      display: grid;
+      gap: 14px;
+    }
+
+    .review-row {
+      display: flex;
+      width: max-content;
+      gap: 14px;
+      animation: review-scroll 60s linear infinite;
+    }
+
+    .review-row.reverse {
+      animation-direction: reverse;
+      animation-duration: 70s;
+    }
+
+    .review-flow {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 12px 14px;
+      align-items: center;
+    }
+
+    @keyframes review-scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .review-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(127,212,255,0.2);
+      background: rgba(12,20,32,0.65);
+      color: #d7e3f1;
+      font-size: 0.92rem;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 900px) {
+      .hero-highlights { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 2.6rem; }
+      .quote-grid { grid-template-columns: 1fr; }
+      .review-row { animation: none; }
+      .review-streams { gap: 12px; }
+      .review-flow { flex-direction: column; }
+      .review-chip { align-self: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="nav-row">
+      <a href="index.html" class="logo">
+        <img src="./assets/logo.png" alt="EYE OPENER logo">
+      </a>
+
+      <nav class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="product.html">Product</a>
+        <a href="technology.html">Technology</a>
+        <a href="goal.html">Goal</a>
+        <a href="experience.html">Experience</a>
+        <a href="pricing.html">Pricing</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="#login" class="login">Login</a>
+        <a href="#demo" class="cta">Try Demo</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Experience</h1>
+      <h2>Clarity-first guidance that feels effortless</h2>
+      <p>
+        A calm, intelligent experience that translates dense sensor data into
+        simple, trusted decisions. The interface prioritizes focus, removes
+        friction, and keeps users in control as conditions change.
+      </p>
+      <div class="hero-highlights">
+        <div class="hero-chip">
+          <strong>REAL-TIME</strong>
+          Live indoor insights with clear, human-readable context.
+        </div>
+        <div class="hero-chip">
+          <strong>EXPLAINABLE</strong>
+          Every suggestion is grounded in transparent reasoning.
+        </div>
+        <div class="hero-chip">
+          <strong>LOW FRICTION</strong>
+          Minimal clicks, fast actions, zero visual clutter.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="video-demo">
+    <h2 class="section-title">Video Demo</h2>
+    <p class="section-subtitle">
+      A short walkthrough of the real-time dashboard and decision flow, showing how
+      the system translates sensor data into clear, actionable guidance.
+    </p>
+    <div class="video-shell">
+      <video class="video-frame" controls preload="metadata" poster="assets/topic.png">
+        <source src="assets/experience.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">What Users Say</h2>
+    <p class="section-subtitle">
+      Calm, transparent guidance that builds trust and makes daily decisions feel effortless.
+    </p>
+    <div class="quote-grid">
+      <div class="quote-card">
+        <p class="quote-text">“The recommendations are clear and grounded. I always know why the system suggests a change.
+        <div class="quote-meta">
+          <strong>Homeowner, Manchester</strong>
+          <span>Cold-season pilot</span>
+        </div>
+      </div>
+      <div class="quote-card">
+        <p class="quote-text">“It feels calm and precise. The interface doesn’t overwhelm, but still gives me full control.
+        <div class="quote-meta">
+          <strong>Apartment Resident</strong>
+          <span>Multi-room setup</span>
+        </div>
+      </div>
+      <div class="quote-card">
+        <p class="quote-text">“We can scale the system easily. The insights over time have changed how we manage heating.
+        <div class="quote-meta">
+          <strong>Facilities Manager</strong>
+          <span>Building deployment</span>
+        </div>
+      </div>
+    </div>
+    <div class="review-wall">
+      <div class="review-streams">
+        <div class="review-row">
+          <div class="review-flow">
+            <span class="review-chip">“The system feels smart without being intrusive, it just works quietly in the background.</span>
+            <span class="review-chip">“I finally understand when my heating is actually wasting energy.</span>
+            <span class="review-chip">“Simple setup, but surprisingly thoughtful recommendations.</span>
+            <span class="review-chip">“It makes my home feel more intelligent, not more complicated.</span>
+            <span class="review-chip">“The insights are clear and easy to trust.</span>
+            <span class="review-chip">“I like that it explains why it suggests an action.</span>
+            <span class="review-chip">“This feels like a real product, not just a tech demo.</span>
+            <span class="review-chip">“The window detection works better than I expected.<span>
+            <span class="review-chip">“It helped me notice energy waste I never paid attention to before.</span>
+            <span class="review-chip">“Clean interface and genuinely useful feedback.</span>
+            <span class="review-chip">“The balance between automation and user control is perfect.</span>
+            <span class="review-chip">“I appreciate how calm and non-intrusive the notifications are.</span>
+            <span class="review-chip">“It feels designed for real homes, not just ideal conditions.</span>
+            <span class="review-chip">“The system adapts naturally to daily routines.</span>
+            <span class="review-chip">“I trust the recommendations because they’re easy to understand.</span>
+          </div>
+          <div class="review-flow">
+            <span class="review-chip">“The system feels smart without being intrusive, it just works quietly in the background.</span>
+            <span class="review-chip">“I finally understand when my heating is actually wasting energy.</span>
+            <span class="review-chip">“Simple setup, but surprisingly thoughtful recommendations.</span>
+            <span class="review-chip">“It makes my home feel more intelligent, not more complicated.</span>
+            <span class="review-chip">“The insights are clear and easy to trust.</span>
+            <span class="review-chip">“I like that it explains why it suggests an action.</span>
+            <span class="review-chip">“This feels like a real product, not just a tech demo.</span>
+            <span class="review-chip">“The window detection works better than I expected.</span>
+            <span class="review-chip">“It helped me notice energy waste I never paid attention to before.</span>
+            <span class="review-chip">“Clean interface and genuinely useful feedback.</span>
+            <span class="review-chip">“The balance between automation and user control is perfect.</span>
+            <span class="review-chip">“I appreciate how calm and non-intrusive the notifications are.</span>
+            <span class="review-chip">“It feels designed for real homes, not just ideal conditions.</span>
+            <span class="review-chip">“The system adapts naturally to daily routines.</span>
+            <span class="review-chip">“I trust the recommendations because they’re easy to understand.</span>
+          </div>
+        </div>
+        <div class="review-row reverse">
+          <div class="review-flow">
+            <span class="review-chip">“It’s smart without trying too hard to look smart.</span>
+            <span class="review-chip">“The architecture clearly has room to grow.</span>
+            <span class="review-chip">“Everything feels well thought out and intentional.</span>
+            <span class="review-chip">“It makes energy awareness effortless.</span>
+            <span class="review-chip">“I like that it focuses on comfort as much as efficiency.</span>
+            <span class="review-chip">“The context-based decisions feel surprisingly human.</span>
+            <span class="review-chip">“It helped reduce unnecessary heating without sacrificing comfort.</span>
+            <span class="review-chip">“The interface feels modern, calm, and professional.</span>
+            <span class="review-chip">“I can see this scaling easily to multiple rooms.</span>
+            <span class="review-chip">“The data presentation is clean and meaningful.</span>
+            <span class="review-chip">“It doesn’t overwhelm me with numbers.</span>
+            <span class="review-chip">“The system feels reliable even without constant interaction.</span>
+            <span class="review-chip">“I like how the logic is transparent, not a black box.</span>
+            <span class="review-chip">“It encourages better habits without being pushy.</span>
+            <span class="review-chip">“The modular design makes future upgrades feel easy.</span>
+          </div>
+          <div class="review-flow">
+            <span class="review-chip">“It’s smart without trying too hard to look smart.</span>
+            <span class="review-chip">“The architecture clearly has room to grow.</span>
+            <span class="review-chip">“Everything feels well thought out and intentional.</span>
+            <span class="review-chip">“It makes energy awareness effortless.</span>
+            <span class="review-chip">“I like that it focuses on comfort as much as efficiency.</span>
+            <span class="review-chip">“The context-based decisions feel surprisingly human.</span>
+            <span class="review-chip">“It helped reduce unnecessary heating without sacrificing comfort.</span>
+            <span class="review-chip">“The interface feels modern, calm, and professional.</span>
+            <span class="review-chip">“I can see this scaling easily to multiple rooms.</span>
+            <span class="review-chip">“The data presentation is clean and meaningful.</span>
+            <span class="review-chip">“It doesn’t overwhelm me with numbers.</span>
+            <span class="review-chip">“The system feels reliable even without constant interaction.</span>
+            <span class="review-chip">“I like how the logic is transparent, not a black box.</span>
+            <span class="review-chip">“It encourages better habits without being pushy.</span>
+            <span class="review-chip">“The modular design makes future upgrades feel easy.</span>
+          </div>
+        </div>
+        <div class="review-row">
+          <div class="review-flow">
+            <span class="review-chip">“This is the first system that actually explains its decisions well.</span>
+            <span class="review-chip">“It blends seamlessly into daily life.</span>
+            <span class="review-chip">“The design feels premium and purposeful.</span>
+            <span class="review-chip">“I feel more aware of my indoor environment now.</span>
+            <span class="review-chip">“The recommendations are practical, not theoretical.</span>
+            <span class="review-chip">“It’s clear a lot of thought went into the user experience.</span>
+            <span class="review-chip">“The system feels future-proof.</span>
+            <span class="review-chip">“I like how it connects multiple signals into one clear insight.</span>
+            <span class="review-chip">“It turns raw sensor data into something meaningful.</span>
+            <span class="review-chip">“The scalability makes it feel like a long-term solution.</span>
+            <span class="review-chip">“It’s reassuring to see energy efficiency handled intelligently.</span>
+            <span class="review-chip">“The explanations make the system feel trustworthy.</span>
+            <span class="review-chip">“I didn’t realize how often heating and ventilation conflicted before.</span>
+            <span class="review-chip">“The visual design makes complex ideas feel simple.</span>
+            <span class="review-chip">“It feels like a smart assistant, not a controller.</span>
+          </div>
+          <div class="review-flow">
+            <span class="review-chip">“This is the first system that actually explains its decisions well.</span>
+            <span class="review-chip">“It blends seamlessly into daily life.</span>
+            <span class="review-chip">“The design feels premium and purposeful.</span>
+            <span class="review-chip">“I feel more aware of my indoor environment now.</span>
+            <span class="review-chip">“The recommendations are practical, not theoretical.</span>
+            <span class="review-chip">“It’s clear a lot of thought went into the user experience.</span>
+            <span class="review-chip">“The system feels future-proof.</span>
+            <span class="review-chip">“I like how it connects multiple signals into one clear insight.</span>
+            <span class="review-chip">“It turns raw sensor data into something meaningful.</span>
+            <span class="review-chip">“The scalability makes it feel like a long-term solution.</span>
+            <span class="review-chip">“It’s reassuring to see energy efficiency handled intelligently.</span>
+            <span class="review-chip">“The explanations make the system feel trustworthy.</span>
+            <span class="review-chip">“I didn’t realize how often heating and ventilation conflicted before.</span>
+            <span class="review-chip">“The visual design makes complex ideas feel simple.</span>
+            <span class="review-chip">“It feels like a smart assistant, not a controller.</span>
+          </div>
+        </div>
+        <div class="review-row reverse">
+          <div class="review-flow">
+            <span class="review-chip">“The system respects user intent rather than overriding it.</span>
+            <span class="review-chip">“It fits naturally into a modern smart home setup.</span>
+            <span class="review-chip">“I appreciate the focus on long-term insights.</span>
+            <span class="review-chip">“The decision logic feels well grounded in real data.</span>
+            <span class="review-chip">“It’s impressive how lightweight yet capable the system feels.</span>
+            <span class="review-chip">“This makes energy efficiency feel achievable, not technical.</span>
+            <span class="review-chip">“The system grows with your needs instead of locking you in.</span>
+            <span class="review-chip">“I like that it’s designed around real behavior patterns.</span>
+            <span class="review-chip">“It’s both informative and reassuring.</span>
+            <span class="review-chip">“The whole experience feels calm and intentional.</span>
+            <span class="review-chip">“The future-readiness is clearly built in from the start.</span>
+            <span class="review-chip">“It’s rare to see explainability done this well.</span>
+            <span class="review-chip">“The product feels mature beyond its scope.</span>
+            <span class="review-chip">“It turns small daily decisions into meaningful savings.</span>
+            <span class="review-chip">“This feels like the foundation of a truly intelligent home.</span>
+          </div>
+          <div class="review-flow">
+            <span class="review-chip">“The system respects user intent rather than overriding it.</span>
+            <span class="review-chip">“It fits naturally into a modern smart home setup.</span>
+            <span class="review-chip">“I appreciate the focus on long-term insights.</span>
+            <span class="review-chip">“The decision logic feels well grounded in real data.</span>
+            <span class="review-chip">“It’s impressive how lightweight yet capable the system feels.</span>
+            <span class="review-chip">“This makes energy efficiency feel achievable, not technical.</span>
+            <span class="review-chip">“The system grows with your needs instead of locking you in.</span>
+            <span class="review-chip">“I like that it’s designed around real behavior patterns.</span>
+            <span class="review-chip">“It’s both informative and reassuring.</span>
+            <span class="review-chip">“The whole experience feels calm and intentional.</span>
+            <span class="review-chip">“The future-readiness is clearly built in from the start.</span>
+            <span class="review-chip">“It’s rare to see explainability done this well.</span>
+            <span class="review-chip">“The product feels mature beyond its scope.</span>
+            <span class="review-chip">“It turns small daily decisions into meaningful savings.</span>
+            <span class="review-chip">“This feels like the foundation of a truly intelligent home.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Embedded Systems Coursework Internet of Things 2026
+  </footer>
+
+  <script>
+    window.addEventListener('scroll', () => {
+      document.querySelector('.navbar')
+        .classList.toggle('scrolled', window.scrollY > 10);
+    });
+  </script>
+</body>
+</html>

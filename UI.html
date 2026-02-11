@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Home Air & Heater Dashboard</title>
+
+  <style>
+    :root { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial; }
+    body { margin: 0; background: #0b1220; color: #e6edf3; overflow-x:hidden; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 20px; }
+    .row { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; margin-top: 14px; }
+
+    .card {
+      grid-column: span 12;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(121, 76, 76, 0.1);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    @media (min-width: 760px){
+      .half { grid-column: span 6; }
+      .third { grid-column: span 4; }
+    }
+
+    h1 { margin: 0 0 10px; font-size: 18px; }
+    h2 { margin: 0 0 8px; font-size: 14px; opacity: .9; }
+    .muted { opacity: .7; font-size: 12px; }
+
+    .kv { display:flex; gap: 12px; align-items: baseline; }
+    .big { font-size: 40px; font-weight: 700; }
+
+    .pill {
+      display:inline-flex; align-items:center; gap:8px;
+      border-radius:999px; padding:6px 10px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.14);
+      font-size:12px;
+    }
+
+    .dot { width:10px; height:10px; border-radius:50%; background:#64748b; }
+    .dot.ok { background:#22c55e; }
+    .dot.bad { background:#ef4444; }
+
+    input, button, select {
+      background: rgba(255,255,255,0.06);
+      color:#e6edf3;
+      border:1px solid rgba(255,255,255,0.16);
+      border-radius:10px;
+      padding:10px 12px;
+    }
+    button { cursor:pointer; font-weight:600; }
+    button.primary { background:rgba(59,130,246,0.2); }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+
+    .log {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas;
+      background: rgba(0,0,0,0.25);
+      border-radius:12px;
+      padding:10px;
+      height:160px;
+      overflow:auto;
+      font-size:12px;
+    }
+
+    /* simple switch */
+    .switchRow { display:flex; align-items:center; gap:12px; margin-top:10px; }
+    .switch { position: relative; display: inline-block; width: 54px; height: 32px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; inset: 0;
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.18);
+      transition: .2s;
+      border-radius: 999px;
+    }
+    .slider:before {
+      position: absolute; content: "";
+      height: 24px; width: 24px; left: 4px; top: 3px;
+      background: #e6edf3;
+      transition: .2s;
+      border-radius: 50%;
+      opacity: .95;
+    }
+    input:checked + .slider { background: rgba(34,197,94,0.20); }
+    input:checked + .slider:before { transform: translateX(22px); }
+
+    /* ===== Sidebar (drawer) ===== */
+    .drawerBtn{
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 50;
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.14);
+      backdrop-filter: blur(10px);
+    }
+    .drawerOverlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      opacity: 0;
+      pointer-events: none;
+      transition: .2s;
+      z-index: 40;
+    }
+    .drawer{
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: min(360px, 88vw);
+      background: rgba(10, 16, 30, 0.92);
+      border-right: 1px solid rgba(255,255,255,0.10);
+      transform: translateX(-105%);
+      transition: .22s;
+      z-index: 45;
+      padding: 16px;
+      box-sizing: border-box;
+      backdrop-filter: blur(10px);
+    }
+    body.drawerOpen .drawer{ transform: translateX(0); }
+    body.drawerOpen .drawerOverlay{
+      opacity: 1;
+      pointer-events: auto;
+    }
+    body.drawerOpen .drawerBtn{
+      opacity: 0;
+      pointer-events: none;
+    }
+    .drawerHeader{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .drawerTitle{ font-weight: 800; letter-spacing: .2px; }
+    .drawerCard{
+      margin-top: 12px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .drawerRow{
+      display:flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .segRow{
+      display:flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+    .segBtn{
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 12px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.14);
+    }
+    .segBtn.active{
+      background: rgba(59,130,246,0.22);
+      border-color: rgba(59,130,246,0.4);
+    }
+    .headerRow{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .backLink{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(59,130,246,0.18);
+      border: 1px solid rgba(59,130,246,0.4);
+      color: #e6edf3;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+      transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    }
+    .backLink:hover{
+      transform: translateY(-1px);
+      border-color: rgba(125,211,252,0.6);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.35);
+    }
+    .hint{ font-size: 12px; opacity: .7; line-height: 1.35; }
+  </style>
+</head>
+
+<body>
+
+<!-- Sidebar toggle button -->
+<button class="drawerBtn" id="btnDrawer" title="Open settings"></button>
+
+<!-- Overlay -->
+<div class="drawerOverlay" id="drawerOverlay"></div>
+
+<!-- Drawer -->
+<aside class="drawer" aria-label="Settings" id="drawer">
+  <div class="drawerHeader">
+    <div class="drawerTitle">Automation Settings</div>
+    <button id="btnCloseDrawer" title="Close"></button>
+  </div>
+
+  <div class="drawerCard">
+    <div class="hint">
+      Adjust how the heater responds when the window is open or closed.
+    </div>
+
+    <div class="drawerRow">
+      <div><b>Auto-off behavior</b></div>
+      <div class="segRow" id="segAutoOff"></div>
+      <div class="hint">Automatic: turn off when the window is open. Smart: Automatic heater decisioin based on sensor data and algorithm. Alert: notify only. Off: ignore this rule.</div>
+    </div>
+
+    <div class="drawerRow">
+      <div><b>Auto-on behavior</b></div>
+      <div class="segRow" id="segAutoOn"></div>
+      <div class="hint">Automatic: turn on when the window is closed. Smart: Automatic heater decisioin based on sensor data and algorithm. Alert: notify only. Off: ignore this rule.</div>
+    </div>
+
+    <div class="drawerRow">
+      <div><b>Health alert when window is open</b></div>
+      <div class="segRow" id="segHealthAlert"></div>
+      <div class="hint">If ON, you will receive a phone alert when temperature or humidity is unhealthy.</div>
+    </div>
+  </div>
+
+  <div class="drawerCard">
+    <div><b>Alert notifications</b></div>
+    <div class="drawerRow">
+      <div class="hint" id="notifyStatus">Notifications are off.</div>
+      <button type="button" id="btnEnableNotify">Enable notifications</button>
+      <div class="hint">If your browser and phone allow it, alerts will vibrate and show a notification while this page is open.</div>
+    </div>
+  </div>
+</aside>
+
+<div class="wrap">
+
+  <!-- Connection -->
+  <div class="card">
+    <div class='headerRow'>
+      <h1>Home Air & Heater Dashboard</h1>
+      <div>
+        <a class='backLink' href='http://10.215.255.119:8000' aria-label='Open device UI'>Open Device UI</a>
+        <a class='backLink' href='product.html' aria-label='Back to product page'> Back to Product</a>
+      </div>
+    </div>
+
+    <div class="pill">
+      <span id="connDot" class="dot"></span>
+      <span id="connText">Not connected</span>
+    </div>
+
+    <div style="margin-top:10px">
+      <input id="wsUrl" placeholder="Device address (e.g. ws://10.215.255.119:9001)" style="min-width:280px">
+      <button class="primary" id="btnConnect">Connect to device</button>
+      <button id="btnDisconnect" disabled>Disconnect</button>
+    </div>
+
+    <div class="muted" style="margin-top:6px">
+      Live data feeds: <b>cx/iotbox01/sensors</b>, <b>cx/iotbox01/heater</b>
+    </div>
+  </div>
+
+  <!-- Data -->
+  <div class="row">
+
+    <div class="card half">
+      <h2>Temperature</h2>
+      <div class="kv">
+        <div class="big"><span id="tempValue">--</span> °C</div>
+      </div>
+      <div class="muted">Updated: <span id="tempAt">--</span></div>
+    </div>
+
+    <div class="card half">
+      <h2>Humidity</h2>
+      <div class="kv">
+        <div class="big"><span id="humValue">--</span> %</div>
+      </div>
+      <div class="muted">Updated: <span id="humAt">--</span></div>
+    </div>
+
+    <div class="card half">
+      <h2>Window Opening</h2>
+      <div class="kv">
+        <div class="big"><span id="winValue">--</span></div>
+      </div>
+      <div class="muted">Updated: <span id="winAt">--</span></div>
+    </div>
+
+    <div class="card half">
+      <h2>CO2 (eCO2)</h2>
+      <div class="kv">
+        <div class="big"><span id="co2Value">--</span> ppm</div>
+      </div>
+      <div class="muted">Updated: <span id="co2At">--</span></div>
+    </div>
+
+    <div class="card half">
+      <h2>Air Quality (TVOC)</h2>
+      <div class="kv">
+        <div class="big"><span id="tvocValue">--</span> ppb</div>
+      </div>
+      <div class="muted">Updated: <span id="tvocAt">--</span></div>
+    </div>
+
+    <!-- Heater Control -->
+    <div class="card third">
+      <h2>Heater</h2>
+      <div class="big" id="heaterStateText">--</div>
+      <div class="switchRow">
+        <label class="switch" title="Turn the heater on or off">
+          <input id="heaterToggle" type="checkbox" disabled>
+          <span class="slider"></span>
+        </label>
+        <div class="muted">Updated: <span id="heaterAt">--</span></div>
+      </div>
+      <div class="muted" style="margin-top:8px">
+        This control sends a request to the hub, and the heater updates shortly after.
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Latest Alert</h2>
+      <div class="kv">
+        <div class="big"><span id="alertValue">--</span></div>
+      </div>
+      <div class="muted">Updated: <span id="alertAt">--</span></div>
+    </div>
+
+    <div class="card">
+      <h2>Activity</h2>
+      <div class="log" id="log"></div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<script>
+  const INITIAL_HEATER_STATE = {{ current_heater_state|tojson|safe }};
+  // ===== Fixed MQTT Topics (telemetry only) =====
+  const TOPIC_SENSORS = "cx/iotbox01/sensors";
+  const TOPIC_HEATER  = "cx/iotbox01/heater";
+  const TOPIC_ALERT   = "cx/iotbox01/alert";
+
+  const connDot = document.getElementById("connDot");
+  const connText = document.getElementById("connText");
+
+  const tempValue = document.getElementById("tempValue");
+  const humValue  = document.getElementById("humValue");
+  const winValue  = document.getElementById("winValue");
+  const co2Value  = document.getElementById("co2Value");
+  const tvocValue = document.getElementById("tvocValue");
+
+  const heaterStateText = document.getElementById("heaterStateText");
+  const heaterToggle = document.getElementById("heaterToggle");
+  const alertValue = document.getElementById("alertValue");
+
+  const tempAt = document.getElementById("tempAt");
+  const humAt  = document.getElementById("humAt");
+  const winAt  = document.getElementById("winAt");
+  const co2At  = document.getElementById("co2At");
+  const tvocAt = document.getElementById("tvocAt");
+  const heaterAt = document.getElementById("heaterAt");
+  const alertAt = document.getElementById("alertAt");
+
+  const logEl = document.getElementById("log");
+  const btnConnect = document.getElementById("btnConnect");
+  const btnDisconnect = document.getElementById("btnDisconnect");
+
+  // Drawer elements
+  const btnDrawer = document.getElementById("btnDrawer");
+  const btnCloseDrawer = document.getElementById("btnCloseDrawer");
+  const drawerOverlay = document.getElementById("drawerOverlay");
+  const notifyStatus = document.getElementById("notifyStatus");
+  const btnEnableNotify = document.getElementById("btnEnableNotify");
+
+  const segAutoOff    = document.getElementById("segAutoOff");
+  const segAutoOn     = document.getElementById("segAutoOn");
+  const segHealthAlert = document.getElementById("segHealthAlert");
+
+  let client = null;
+  const NOTIFY_PREF_KEY = "notifyEnabled";
+  let notifyEnabled = localStorage.getItem(NOTIFY_PREF_KEY) === "true";
+
+  // remember last heater state shown (from server OR mqtt)
+  let lastHeaterCmd = null;
+
+  function now(){ return new Date().toLocaleTimeString(); }
+
+  function log(msg){
+    logEl.textContent += `[${now()}] ${msg}\n`;
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function setConn(ok, text){
+    connDot.className = "dot " + (ok ? "ok" : "bad");
+    connText.textContent = text;
+  }
+
+  function safeNumber(x){
+    const n = Number(x);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function normalizeHeaterCmd(x){
+    if (typeof x !== "string") return null;
+    const v = x.trim().toUpperCase();
+    return (v === "ON" || v === "OFF") ? v : null;
+  }
+
+  function setHeaterUI(cmd){
+    if (cmd === "ON") {
+      heaterStateText.textContent = "ON";
+      heaterToggle.checked = true;
+    } else if (cmd === "OFF") {
+      heaterStateText.textContent = "OFF";
+      heaterToggle.checked = false;
+    } else {
+      heaterStateText.textContent = "--";
+      heaterToggle.checked = false;
+    }
+    heaterAt.textContent = now();
+  }
+
+  function canNotify(){
+    return "Notification" in window;
+  }
+
+  function updateNotifyUI(){
+    if (!window.isSecureContext) {
+      notifyStatus.textContent = "Notifications require HTTPS or localhost.";
+      btnEnableNotify.disabled = true;
+      btnEnableNotify.textContent = "Unavailable";
+      return;
+    }
+
+    if (!canNotify()) {
+      notifyStatus.textContent = "Notifications not supported in this browser.";
+      btnEnableNotify.disabled = true;
+      return;
+    }
+
+    const permission = Notification.permission;
+    if (!notifyEnabled) {
+      notifyStatus.textContent = "Notifications are off.";
+      btnEnableNotify.disabled = false;
+      btnEnableNotify.textContent = "Enable notifications";
+      return;
+    }
+
+    if (permission === "granted") {
+      notifyStatus.textContent = "Notifications enabled.";
+      btnEnableNotify.disabled = true;
+      btnEnableNotify.textContent = "Enabled";
+      return;
+    }
+
+    if (permission === "denied") {
+      notifyStatus.textContent = "Notifications blocked. Enable in browser settings.";
+      btnEnableNotify.disabled = true;
+      btnEnableNotify.textContent = "Blocked";
+      return;
+    }
+
+    notifyStatus.textContent = "Permission not granted yet.";
+    btnEnableNotify.disabled = false;
+    btnEnableNotify.textContent = "Enable notifications";
+  }
+
+  async function requestNotifyPermission(){
+    if (!window.isSecureContext) {
+      log("Notifications require HTTPS or localhost.");
+      updateNotifyUI();
+      return;
+    }
+    if (!canNotify()) return;
+    try {
+      const result = await Notification.requestPermission();
+      if (result === "granted") {
+        notifyEnabled = true;
+        localStorage.setItem(NOTIFY_PREF_KEY, "true");
+        log("Notifications enabled");
+      } else {
+        notifyEnabled = false;
+        localStorage.setItem(NOTIFY_PREF_KEY, "false");
+        log("Notifications not enabled");
+      }
+    } catch (e) {
+      log(`Notification permission failed: ${e.message || e}`);
+    }
+    updateNotifyUI();
+  }
+
+  function maybeVibrate(){
+    if (!("vibrate" in navigator)) return;
+    try { navigator.vibrate([150, 80, 150]); } catch (e) {}
+  }
+
+  function maybeNotify(msg){
+    if (!notifyEnabled || !canNotify()) return;
+    if (Notification.permission !== "granted") return;
+    try {
+      new Notification("Home Air Alert", { body: msg || "Alert received", silent: false });
+    } catch (e) {}
+  }
+
+  // ====== NEW: HTTP -> server publishes MQTT ======
+  async function apiPost(path, body){
+    const res = await fetch(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body || {})
+    });
+    let data = null;
+    try { data = await res.json(); } catch(e) {}
+    if (!res.ok) {
+      const msg = data?.error || `HTTP ${res.status}`;
+      throw new Error(msg);
+    }
+    return data;
+  }
+
+  async function publishHeaterViaServer(command){
+    // Only send if changed
+    if (command === lastHeaterCmd) return;
+
+    // Optimistic UI update
+    lastHeaterCmd = command;
+    setHeaterUI(command);
+
+    try {
+      const data = await apiPost("/api/heater", { command });
+      log(`Heater request sent`);
+      // If server returns a canonical state, apply it
+      if (data?.state) {
+        lastHeaterCmd = data.state;
+        setHeaterUI(data.state);
+      }
+    } catch (e) {
+      log(`Heater request failed: ${e.message}`);
+      // revert unknown
+      lastHeaterCmd = null;
+    }
+  }
+
+  // ===== NEW: manual rule flip (no timers) =====
+  async function manualRuleFlip(cmd){
+    if (cmd === "ON") {
+      if (currentAutoOff === "Automatic" || currentAutoOff === "Smart") {
+        const patch = {
+          auto_off_mode: "Alert",
+        };
+        try {
+          await saveSettings(patch);
+          seg1?.setActive("Alert");
+          log("Manual heater ON: switched auto-off to Alert");
+        } catch (e) {
+          log(`Auto-off update failed: ${e.message}`);
+        }
+      }
+    }
+
+    if (cmd === "OFF") {
+      if (currentAutoOn === "Automatic" || currentAutoOn === "Smart") {
+        const patch = {
+          auto_on_mode: "Alert",
+        };
+        try {
+          await saveSettings(patch);
+          seg2?.setActive("Alert");
+          log("Manual heater OFF: switched auto-on to Alert");
+        } catch (e) {
+          log(`Auto-on update failed: ${e.message}`);
+        }
+      }
+    }
+  }
+
+
+  heaterToggle.addEventListener("change", async () => {
+    const cmd = heaterToggle.checked ? "ON" : "OFF";
+
+    // NEW: flip the relevant rule switch to Off
+    await manualRuleFlip(cmd);
+
+    // Existing: send the manual heater command
+    publishHeaterViaServer(cmd);
+  });
+
+
+  function handleHeaterMessage(raw){
+    // Accept either raw "ON"/"OFF" OR JSON: { "command": "ON" }
+    let cmd = normalizeHeaterCmd(raw);
+
+    if (!cmd) {
+      try {
+        const obj = JSON.parse(raw);
+        cmd = normalizeHeaterCmd(obj?.command);
+      } catch (e) {}
+    }
+
+    if (!cmd) {
+      log(`Heater update not understood: ${raw}`);
+      return;
+    }
+
+    lastHeaterCmd = cmd;
+    setHeaterUI(cmd);
+  }
+
+  function handleAlertMessage(raw){
+    let msg = raw;
+    try {
+      const obj = JSON.parse(raw);
+      if (obj && typeof obj === "object") {
+        const cmd = obj.command ? String(obj.command) : "";
+        const reason = obj.reason ? String(obj.reason) : "";
+        if (reason && cmd) msg = `${reason} (${cmd})`;
+        else if (reason) msg = reason;
+        else if (cmd) msg = cmd;
+      }
+    } catch (e) {}
+
+    alertValue.textContent = msg || "--";
+    alertAt.textContent = now();
+    maybeVibrate();
+    maybeNotify(msg);
+  }
+
+  // ===== Sidebar segmented controls =====
+  function makeSegment(parentEl, options, initialValue, onChange){
+    parentEl.innerHTML = "";
+    const buttons = new Map();
+
+    function setActive(val){
+      for (const [v, btn] of buttons.entries()){
+        btn.classList.toggle("active", v === val);
+      }
+    }
+
+    for (const opt of options){
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "segBtn";
+      btn.textContent = opt.label;
+      btn.onclick = () => {
+        setActive(opt.value);
+        onChange(opt.value);
+      };
+      buttons.set(opt.value, btn);
+      parentEl.appendChild(btn);
+    }
+
+    setActive(initialValue);
+    return { setActive };
+  }
+
+  const triOptions = [
+    { label: "Automatic", value: "Automatic" },
+    { label: "Smart", value: "Smart" },
+    { label: "Alert", value: "Alert" },
+    { label: "Off", value: "Off" },
+  ];
+  const onOffOptions = [
+    { label: "ON", value: "ON" },
+    { label: "OFF", value: "OFF" },
+  ];
+
+  let seg1 = null, seg2 = null, seg3 = null;
+  let currentAutoOff = null;
+  let currentAutoOn = null;
+
+  function normalizeMode(v){
+    if (v === "Automatic" || v === "Smart" || v === "Alert" || v === "Off") return v;
+    return null;
+  }
+
+  function sanitizeModes(changedKey, nextValue){
+    const proposedOff = (changedKey === "auto_off_mode") ? nextValue : currentAutoOff;
+    const proposedOn  = (changedKey === "auto_on_mode") ? nextValue : currentAutoOn;
+
+    if (
+      (proposedOff === "Automatic" && proposedOn === "Smart") ||
+      (proposedOff === "Smart" && proposedOn === "Automatic")
+    ) {
+      // Disallow mixed Automatic/Smart: adjust the other switch to match
+      if (changedKey === "auto_off_mode") {
+        return { auto_off_mode: nextValue, auto_on_mode: nextValue };
+      }
+      return { auto_on_mode: nextValue, auto_off_mode: nextValue };
+    }
+
+    return { [changedKey]: nextValue };
+  }
+
+  async function loadSettings(){
+    try {
+      const res = await fetch("/api/settings");
+      const data = await res.json();
+
+      currentAutoOff = normalizeMode(data.auto_off_mode);
+      currentAutoOn = normalizeMode(data.auto_on_mode);
+
+      seg1 = makeSegment(segAutoOff, triOptions, currentAutoOff || "Automatic", async (val) => {
+        await saveSettings(sanitizeModes("auto_off_mode", val));
+      });
+
+      seg2 = makeSegment(segAutoOn, triOptions, currentAutoOn || "Automatic", async (val) => {
+        await saveSettings(sanitizeModes("auto_on_mode", val));
+      });
+
+      seg3 = makeSegment(segHealthAlert, onOffOptions, data.open_window_health_alert, async (val) => {
+        await saveSettings({ open_window_health_alert: val });
+      });
+
+      if (data.open_window_health_alert !== "ON") {
+        await saveSettings({ open_window_health_alert: "ON" });
+        seg3?.setActive("ON");
+      }
+
+    } catch (e) {
+      log(`Could not load settings: ${e.message || e}`);
+    }
+  }
+
+  async function saveSettings(patch){
+    try {
+      const data = await apiPost("/api/settings", patch);
+
+      // keep UI in sync if server canonicalizes
+      if (data?.settings){
+        if (normalizeMode(data.settings.auto_off_mode)) {
+          currentAutoOff = data.settings.auto_off_mode;
+          seg1?.setActive(currentAutoOff);
+        }
+        if (normalizeMode(data.settings.auto_on_mode)) {
+          currentAutoOn = data.settings.auto_on_mode;
+          seg2?.setActive(currentAutoOn);
+        }
+        seg3?.setActive(data.settings.open_window_health_alert);
+      }
+
+      log(`Settings saved`);
+    } catch (e) {
+      log(`Settings save failed: ${e.message}`);
+    }
+  }
+
+  // Drawer open/close
+  function openDrawer(){ document.body.classList.add("drawerOpen"); }
+  function closeDrawer(){ document.body.classList.remove("drawerOpen"); }
+  btnDrawer.onclick = openDrawer;
+  btnCloseDrawer.onclick = closeDrawer;
+  drawerOverlay.onclick = closeDrawer;
+  btnEnableNotify.onclick = requestNotifyPermission;
+
+  // ===== MQTT telemetry connection =====
+  btnConnect.onclick = () => {
+    const url = document.getElementById("wsUrl").value.trim() || "ws://10.215.255.119:9001";
+
+    setConn(false, "Connecting...");
+    log(`Connecting to device...`);
+
+    client = mqtt.connect(url, { clientId: "web_" + Math.random().toString(16).slice(2) });
+
+    client.on("connect", () => {
+      setConn(true, "Connected");
+      btnDisconnect.disabled = false;
+      heaterToggle.disabled = false;
+
+      client.subscribe([TOPIC_SENSORS, TOPIC_HEATER, TOPIC_ALERT], (err) => {
+        if (err) log("Subscription failed: " + (err.message || err));
+        else log("Subscribed to live updates");
+      });
+    });
+
+    client.on("message", (topic, payload) => {
+      const raw = payload.toString();
+      log(`Update received`);
+
+      if (topic === TOPIC_SENSORS) {
+        try {
+          const data = JSON.parse(raw);
+          const t = safeNumber(data.temperature);
+          const h = safeNumber(data.humidity);
+          const w = safeNumber(data.window);
+          const c = safeNumber(data.co2_ppm);
+          const v = safeNumber(data.tvoc_ppb);
+
+          tempValue.textContent = (t !== null) ? t.toFixed(1) : "--";
+          humValue.textContent  = (h !== null) ? h.toFixed(1) : "--";
+
+          if (w !== null) winValue.textContent = w.toFixed(0);
+          else winValue.textContent = String(data.window ?? "--");
+
+          co2Value.textContent = (c !== null) ? c.toFixed(0) : "--";
+          tvocValue.textContent = (v !== null) ? v.toFixed(0) : "--";
+
+          tempAt.textContent = humAt.textContent = winAt.textContent = now();
+          co2At.textContent = tvocAt.textContent = now();
+        } catch(e){
+          log("Update error: " + e.message);
+        }
+        return;
+      }
+
+      if (topic === TOPIC_HEATER) {
+        handleHeaterMessage(raw);
+        return;
+      }
+
+      if (topic === TOPIC_ALERT) {
+        handleAlertMessage(raw);
+        return;
+      }
+    });
+
+    client.on("reconnect", () => setConn(false, "Reconnecting..."));
+
+    client.on("close", () => {
+      setConn(false, "Not connected");
+      btnDisconnect.disabled = true;
+      heaterToggle.disabled = true;
+      log("Disconnected");
+      lastHeaterCmd = null;
+      setHeaterUI(null);
+    });
+
+    client.on("error", (e) => {
+      log("Connection error: " + (e.message || e));
+    });
+  };
+
+  btnDisconnect.onclick = () => {
+    if (client) {
+      log("Disconnecting...");
+      client.end(true);
+      client = null;
+    }
+  };
+
+  setConn(false, "Not connected");
+  if (INITIAL_HEATER_STATE) {
+    lastHeaterCmd = INITIAL_HEATER_STATE;
+    setHeaterUI(INITIAL_HEATER_STATE);
+  }
+  updateNotifyUI();
+  loadSettings();
+</script>
+</body>
+</html>
+
+
+
+
+

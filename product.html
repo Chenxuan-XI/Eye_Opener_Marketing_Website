@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Product | Smart Window & Heater Advisor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { background: #0b0f14; color: #e6edf3; line-height: 1.6; }
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: #0b0f14;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(4px);
+    }
+
+    .navbar.scrolled {
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .nav-row {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      padding: 0 6%;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      margin-right: 48px;
+      flex-shrink: 0;
+    }
+
+    .logo img {
+      height: 100px;
+      width: auto;
+    }
+
+    .nav-links {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex: 1;
+    }
+
+    .nav-links a {
+      color: #e6edf3;
+      text-decoration: none;
+      font-size: 0.95rem;
+      opacity: 0.75;
+    }
+
+    .nav-links a:hover {
+      opacity: 1;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 20px;
+      flex-shrink: 0;
+    }
+
+    .login {
+      color: #e6edf3;
+      text-decoration: none;
+      opacity: 0.8;
+    }
+
+    .cta {
+      background: #e6edf3;
+      color: #0b0f14;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+    }
+    .hero {
+      padding: 110px 8% 70px;
+      position: relative;
+      overflow: hidden;
+      background: url("assets/tech-bg.jpg") center/cover no-repeat;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(6,10,16,0.55), rgba(6,10,16,0.85));
+      pointer-events: none;
+    }
+    .hero > * {
+      position: relative;
+      z-index: 1;
+    }
+    .hero h1 {
+      font-size: 2.8rem;
+      margin-bottom: 10px;
+      background: linear-gradient(110deg, #e8f6ff 0%, #9ad6ff 40%, #4de1c6 70%, #f3fbff 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 14px rgba(154,214,255,0.25);
+      position: relative;
+      display: inline-block;
+    }
+
+    .hero h1::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -8px;
+      width: 78%;
+      height: 3px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(143,209,255,0.1), rgba(127,212,255,0.9), rgba(111,230,199,0.6));
+      box-shadow: 0 0 14px rgba(127,212,255,0.45);
+    }
+    .hero p { color: #b8c2cc; max-width: 760px; font-size: 1.05rem; }
+
+    .section {
+      padding: 70px 8%;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .section h2 {
+      font-size: 1.8rem;
+      margin-bottom: 14px;
+      color: #e6edf3;
+      position: relative;
+      background: linear-gradient(110deg, #f0f6ff 0%, #7fd4ff 45%, #7a9bff 70%, #dfe9ff 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 18px rgba(127,212,255,0.28);
+      letter-spacing: 0.02em;
+    }
+
+    .section h2::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -6px;
+      width: 110px;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(127,212,255,0.9), rgba(122,155,255,0.4), transparent);
+      box-shadow: 0 0 14px rgba(127,212,255,0.4);
+    }
+
+    .section p { color: #b8c2cc; max-width: 880px; }
+
+    .subsection {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px dashed rgba(127,212,255,0.18);
+    }
+
+    .subsection-title {
+      font-size: 1.2rem;
+      margin-bottom: 12px;
+      position: relative;
+      background: linear-gradient(110deg, #eef6ff 0%, #85d4ff 45%, #7aa3ff 80%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 14px rgba(127,212,255,0.25);
+      letter-spacing: 0.02em;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    .feature-scroller {
+      position: relative;
+      overflow: hidden;
+      margin-top: 24px;
+      padding: 12px 0;
+      mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    }
+
+    .feature-track {
+      display: flex;
+      gap: 20px;
+      width: max-content;
+      animation: feature-scroll 36s linear infinite;
+    }
+
+    .feature-scroller:hover .feature-track {
+      animation-play-state: paused;
+    }
+
+    .feature-track .card {
+      min-width: 280px;
+      max-width: 320px;
+    }
+
+    @keyframes feature-scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .card {
+      background: linear-gradient(145deg, rgba(15,25,40,0.9), rgba(12,18,30,0.65));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+      transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+    }
+
+    .card h3 {
+      font-size: 1rem;
+      margin-bottom: 6px;
+      position: relative;
+      background: linear-gradient(120deg, #e8f6ff 0%, #8fd1ff 50%, #6fe6c7 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 12px rgba(143,209,255,0.2);
+    }
+    .card p { color: #b8c2cc; font-size: 0.92rem; }
+
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(127,212,255,0.35);
+      box-shadow: 0 28px 60px rgba(0,0,0,0.45), 0 0 26px rgba(127,212,255,0.25);
+    }
+
+    .card ul {
+      list-style: none;
+      margin-top: 10px;
+      display: grid;
+      gap: 6px;
+      color: #b8c2cc;
+      font-size: 0.9rem;
+      padding-left: 0;
+    }
+
+    .card ul li {
+      position: relative;
+      padding-left: 16px;
+    }
+
+    .card ul li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 8px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: linear-gradient(120deg, #8fd1ff, #6fe6c7);
+      box-shadow: 0 0 10px rgba(143,209,255,0.35);
+    }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .pill {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(10,20,30,0.6);
+      border: 1px solid rgba(154,214,255,0.25);
+      color: #dbe6f1;
+      font-size: 0.9rem;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .step {
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(127,212,255,0.18);
+      background: rgba(12,20,32,0.7);
+      box-shadow: 0 16px 32px rgba(0,0,0,0.25);
+      transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+    }
+
+    .step span {
+      display: inline-block;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #9ad6ff;
+      margin-bottom: 6px;
+    }
+
+    .step p {
+      color: #d4deea;
+    }
+
+
+    .how-carousel {
+      position: relative;
+      margin-top: 18px;
+      min-height: 140px;
+      cursor: pointer;
+    }
+
+    .how-slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.45s ease;
+    }
+
+    .how-slide.active {
+      opacity: 1;
+      position: relative;
+    }
+
+
+    .highlight {
+      margin-top: 18px;
+      padding: 18px 20px;
+      border-left: 3px solid rgba(48,180,255,0.7);
+      background: rgba(10,16,26,0.35);
+      color: #d8e1ea;
+      line-height: 1.7;
+    }
+
+    .ui-link {
+      margin-top: 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(127,212,255,0.4);
+      background: linear-gradient(135deg, rgba(10,18,30,0.75), rgba(12,28,45,0.55));
+      color: #dbe9f6;
+      text-decoration: none;
+      font-size: 0.95rem;
+      letter-spacing: 0.02em;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.35), 0 0 18px rgba(127,212,255,0.18);
+      transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+    }
+
+    .ui-link::after {
+      content: "→";
+      font-size: 1rem;
+      color: #9ad6ff;
+      text-shadow: 0 0 10px rgba(127,212,255,0.4);
+    }
+
+    .ui-link:hover {
+      transform: translateY(-2px);
+      border-color: rgba(127,212,255,0.7);
+      box-shadow: 0 16px 30px rgba(0,0,0,0.45), 0 0 26px rgba(127,212,255,0.35);
+    }
+
+    .solution-split {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 28px;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .solution-carousel {
+      position: relative;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: linear-gradient(140deg, rgba(14,22,36,0.9), rgba(10,16,26,0.7));
+      box-shadow: 0 24px 50px rgba(0,0,0,0.4);
+      overflow: hidden;
+      min-height: 240px;
+      cursor: pointer;
+    }
+
+    .solution-slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .solution-slide.active {
+      opacity: 1;
+    }
+
+    .solution-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: saturate(1.1) contrast(1.05);
+    }
+
+    .solution-overlay {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(140deg, rgba(9,18,30,0.65), rgba(9,18,30,0.15) 45%, rgba(0,0,0,0.4)),
+        radial-gradient(220px 160px at 15% 20%, rgba(127,212,255,0.22), transparent 60%);
+      pointer-events: none;
+    }
+
+    .solution-hint {
+      position: absolute;
+      bottom: 14px;
+      right: 16px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #cfe5ff;
+      background: rgba(10,18,30,0.6);
+      border: 1px solid rgba(127,212,255,0.35);
+      box-shadow: 0 0 14px rgba(127,212,255,0.25);
+    }
+
+    @media (max-width: 900px) {
+      .solution-split {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .causal-row { display: flex; flex-wrap: nowrap; gap: 18px; margin-top: 22px; align-items: stretch; }
+
+    .causal-card { flex: 1 1 0; min-width: 0; 
+      position: relative;
+      padding: 18px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: linear-gradient(145deg, rgba(14,24,38,0.92), rgba(10,16,26,0.7));
+      box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+    }
+
+    .causal-card h3 {
+      font-size: 1rem;
+      margin-bottom: 6px;
+      background: linear-gradient(120deg, #e8f6ff 0%, #8fd1ff 50%, #6fe6c7 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 12px rgba(143,209,255,0.2);
+    }
+
+    .causal-card .step {
+      position: absolute;
+      top: -10px;
+      left: 14px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #0b0f14;
+      background: linear-gradient(120deg, rgba(127,212,255,0.9), rgba(111,230,199,0.9));
+      box-shadow: 0 8px 18px rgba(0,0,0,0.35);
+    }
+
+    .causal-row .arrow { display: flex; align-items: center; justify-content: center; color: rgba(127,212,255,0.65); font-size: 1.1rem; letter-spacing: 0.1em; }
+
+    .causal-row .arrow::before {
+      content: "->";
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(127,212,255,0.3);
+      background: rgba(10,18,30,0.6);
+      box-shadow: 0 0 14px rgba(127,212,255,0.25);
+    }
+
+    .conflict {
+      margin-top: 18px;
+      padding: 18px 20px;
+      border-left: 3px solid rgba(48,180,255,0.7);
+      background: rgba(10,16,26,0.35);
+      color: #d8e1ea;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 980px) { .causal-row { display: flex; flex-wrap: nowrap; gap: 18px; margin-top: 22px; align-items: stretch; } .causal-row .arrow { display: none; } }
+
+    .intro-split {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 28px;
+      align-items: center;
+    }
+
+    .intro-image {
+      min-height: 220px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background:
+        radial-gradient(300px 180px at 20% 20%, rgba(127,212,255,0.22), transparent 60%),
+        linear-gradient(140deg, rgba(14,22,36,0.9), rgba(10,16,26,0.7));
+      box-shadow: 0 24px 50px rgba(0,0,0,0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .intro-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: saturate(1.05) contrast(1.05);
+      opacity: 0.9;
+    }
+
+    .intro-image::after {
+      content: "IMAGE PLACEHOLDER";
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 0.28em;
+      font-size: 0.72rem;
+      color: rgba(127,212,255,0.55);
+    }
+
+    .intro-image.has-image::after {
+      content: "";
+      display: none;
+    }
+
+    .glow-key {
+      font-weight: 600;
+      background: linear-gradient(120deg, #e8f6ff 0%, #8fd1ff 45%, #6fe6c7 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 14px rgba(143,209,255,0.35);
+      position: relative;
+      padding: 0 2px;
+    }
+
+    .glow-key::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -2px;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(127,212,255,0.9), rgba(111,230,199,0.7), transparent);
+      opacity: 0.6;
+    }
+
+    @media (max-width: 900px) {
+      .intro-split {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .section {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.9s ease, transform 0.9s ease;
+    }
+
+    .section.reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .section {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+    }
+    footer { padding: 40px 8%; text-align: center; color: #7f8a96; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="nav-row">
+      <a href="index.html" class="logo">
+        <img src="./assets/logo.png" alt="EYE OPENER logo">
+      </a>
+
+      <nav class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="product.html">Product</a>
+        <a href="technology.html">Technology</a>
+        <a href="goal.html">Goal</a>
+        <a href="experience.html">Experience</a>
+        <a href="pricing.html">Pricing</a>
+</nav>
+
+      <div class="nav-actions">
+        <a href="#login" class="login">Login</a>
+        <a href="#demo" class="cta">Try Demo</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>Smart Window &amp; Heating Advisor</h1>
+    <p>Make better heating decisions with real-time indoor intelligence.</p>
+  </section>
+
+  <section class="section">
+    <div class="intro-split">
+      <p>
+        Many households waste energy by heating rooms while windows are open, often without realising
+        the impact on <span class="glow-key">comfort</span> and <span class="glow-key">energy efficiency</span>.
+        <span class="glow-key">Eye Opener</span> is an <span class="glow-key">intelligent indoor monitoring</span>
+        system that helps users understand their environment and make informed decisions about
+        <span class="glow-key">ventilation</span> and <span class="glow-key">heating</span>.
+      </p>
+        <div class="intro-image has-image" aria-label="Problem visual">
+          <img src="./assets/problem-bg.png" alt="Problem context visual">
+        </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>The Problem</h2>
+    <p>Heating systems are typically operated without real-time feedback on indoor conditions.</p>
+    <div class="causal-row">
+      <div class="causal-card">
+        <span class="step">01</span>
+        <h3>Unnecessary heat loss</h3>
+        <p>Heat escapes quickly through open windows, wasting energy.</p>
+      </div>
+      <div class="arrow" aria-hidden="true"></div>
+      <div class="causal-card">
+        <span class="step">02</span>
+        <h3>Increased energy consumption</h3>
+        <p>More heating is required to maintain comfort.</p>
+      </div>
+      <div class="arrow" aria-hidden="true"></div>
+      <div class="causal-card">
+        <span class="step">03</span>
+        <h3>Reduced indoor comfort</h3>
+        <p>Temperature swings affect wellbeing and focus.</p>
+      </div>
+    </div>
+    <div class="conflict">
+      Without clear and timely information, it is difficult for occupants to balance ventilation and energy efficiency.
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Our Solution</h2>
+    <div class="solution-split">
+      <div>
+        <p>
+          Eye Opener continuously monitors indoor environmental conditions and provides clear, actionable
+          recommendations to the user.
+        </p>
+        <div class="highlight">
+          By combining <span class="glow-key">sensor data</span> with <span class="glow-key">simple decision logic</span>, the system advises when it is more <span class="glow-key">energy-efficient</span> to <span class="glow-key">open a window</span> or <span class="glow-key">turn off the heating</span> transforming raw data into <span class="glow-key">meaningful guidance</span>.
+        </div>
+      </div>
+      <div class="solution-carousel" id="solutionCarousel" aria-label="Solution image carousel">
+        <div class="solution-slide active">
+          <img src="assets/solution-1.jpg" alt="Indoor sensing overview">
+        </div>
+        <div class="solution-slide">
+          <img src="assets/solution-2.jpg" alt="Decision guidance interface">
+        </div>
+        <div class="solution-slide">
+          <img src="assets/solution-3.png" alt="Connected smart home system">
+        </div>
+        <div class="solution-overlay" aria-hidden="true"></div>
+        <div class="solution-hint">Click to Next</div>
+      </div>
+    </div>
+    <div class="subsection">
+      <div class="subsection-title">How It Works</div>
+      <div class="how-carousel" id="howCarousel" aria-label="How it works carousel">
+        <div class="how-slide active">
+          <div class="step">
+            <span>Step 01</span>
+            <p>Sensors collect indoor environmental data.</p>
+          </div>
+        </div>
+        <div class="how-slide">
+          <div class="step">
+            <span>Step 02</span>
+            <p>Data is transmitted wirelessly to a central system.</p>
+          </div>
+        </div>
+        <div class="how-slide">
+          <div class="step">
+            <span>Step 03</span>
+            <p>Decision logic evaluates energy efficiency conditions.</p>
+          </div>
+        </div>
+        <div class="how-slide">
+          <div class="step">
+            <span>Step 04</span>
+            <p>Recommendations are displayed on a web interface in real time.</p>
+          </div>
+        </div>
+      </div>
+      <a class="ui-link" href="UI.html" aria-label="Open the Eye Opener web UI dashboard">
+        Launch the Web UI Dashboard
+      </a>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Key Features</h2>
+    <div class="feature-scroller" aria-label="Key features scroller">
+      <div class="feature-track">
+      <div class="card">
+        <h3>Real-time environmental sensing</h3>
+        <p>Continuous monitoring of temperature and humidity.</p>
+        <ul>
+          <li>Live sensor sampling</li>
+          <li>Indoor comfort tracking</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Window state awareness</h3>
+        <p>Detection of open or closed window conditions.</p>
+        <ul>
+          <li>Open/close detection</li>
+          <li>Ventilation timing signals</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Intelligent recommendations</h3>
+        <p>Data-driven advice to reduce unnecessary heating loss.</p>
+        <ul>
+          <li>Actionable alerts</li>
+          <li>Energy-saving prompts</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Web-based visualisation</h3>
+        <p>A clear and accessible dashboard for users to view live data and system feedback.</p>
+        <ul>
+          <li>Responsive dashboard</li>
+          <li>Real-time status tiles</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Adaptive thresholds</h3>
+        <p>Configurable rules that align with different homes and seasons.</p>
+        <ul>
+          <li>User-defined comfort bands</li>
+          <li>Seasonal tuning presets</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Data integrity &amp; resilience</h3>
+        <p>Robust handling of intermittent connectivity and sensor noise.</p>
+        <ul>
+          <li>Noise filtering</li>
+          <li>Graceful offline mode</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Real-time environmental sensing</h3>
+        <p>Continuous monitoring of temperature and humidity.</p>
+        <ul>
+          <li>Live sensor sampling</li>
+          <li>Indoor comfort tracking</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Window state awareness</h3>
+        <p>Detection of open or closed window conditions.</p>
+        <ul>
+          <li>Open/close detection</li>
+          <li>Ventilation timing signals</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Intelligent recommendations</h3>
+        <p>Data-driven advice to reduce unnecessary heating loss.</p>
+        <ul>
+          <li>Actionable alerts</li>
+          <li>Energy-saving prompts</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Web-based visualisation</h3>
+        <p>A clear and accessible dashboard for users to view live data and system feedback.</p>
+        <ul>
+          <li>Responsive dashboard</li>
+          <li>Real-time status tiles</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Adaptive thresholds</h3>
+        <p>Configurable rules that align with different homes and seasons.</p>
+        <ul>
+          <li>User-defined comfort bands</li>
+          <li>Seasonal tuning presets</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Data integrity &amp; resilience</h3>
+        <p>Robust handling of intermittent connectivity and sensor noise.</p>
+        <ul>
+          <li>Noise filtering</li>
+          <li>Graceful offline mode</li>
+        </ul>
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Who Is It For?</h2>
+    <div class="pill-list">
+      <div class="pill">Students living in shared accommodation</div>
+      <div class="pill">Energy-conscious households</div>
+      <div class="pill">Users interested in smart home technologies</div>
+      <div class="pill">Anyone looking to reduce energy waste without complex automation</div>
+      <div class="pill">First-time renters</div>
+      <div class="pill">Shared flats and HMOs</div>
+      <div class="pill">University dorms and halls</div>
+      <div class="pill">Young families</div>
+      <div class="pill">Remote workers</div>
+      <div class="pill">Eco-aware landlords</div>
+      <div class="pill">Community housing projects</div>
+      <div class="pill">Energy educators</div>
+    </div>
+  </section>
+
+  <footer>
+    Embedded Systems Coursework �� Internet of Things �� 2026
+  </footer>
+
+  <script>
+    window.addEventListener('scroll', () => {
+      document.querySelector('.navbar')
+        .classList.toggle('scrolled', window.scrollY > 10);
+    });
+  </script>
+
+  <script>
+    const sections = document.querySelectorAll('.section');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('reveal');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    sections.forEach(section => observer.observe(section));
+  </script>
+  <script>
+    const carousel = document.getElementById('solutionCarousel');
+    if (carousel) {
+      const slides = Array.from(carousel.querySelectorAll('.solution-slide'));
+      let index = 0;
+      const showSlide = (i) => {
+        slides.forEach((slide, idx) => {
+          slide.classList.toggle('active', idx === i);
+        });
+      };
+      carousel.addEventListener('click', () => {
+        index = (index + 1) % slides.length;
+        showSlide(index);
+      });
+    }
+  </script>
+  <script>
+    const howCarousel = document.getElementById('howCarousel');
+    if (howCarousel) {
+      const slides = Array.from(howCarousel.querySelectorAll('.how-slide'));
+      let index = 0;
+      const showSlide = (i) => {
+        slides.forEach((slide, idx) => {
+          slide.classList.toggle('active', idx === i);
+        });
+      };
+      howCarousel.addEventListener('click', () => {
+        index = (index + 1) % slides.length;
+        showSlide(index);
+      });
+    }
+  </script>
+</body>
+</html>
+
+
+
+
+
